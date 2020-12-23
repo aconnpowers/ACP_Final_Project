@@ -1,0 +1,120 @@
+---
+title: "Are all politics local politics?"
+author: "Alyse Conn-Powers, a.conn-powers@mpp.hertie-school.org"
+date: "12/23/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+source("Scripts/library_script.R")
+source("Scripts/textmodeling_script.R")
+knitr::opts_chunk$set(fig.height=8, fig.width = 4, fig.align = "center") 
+```
+#####
+<b>SUMMARY</b><br><br>
+In this project, I scraped and compiled text data from each U.S. state Democratic and Republican party and their two national counterparts, the Democratic National Committee and the Republican National Committee, using their most recent formally adopted platforms. Using this text, I predicted their political alignment from left to right by each party, then with all parties represented to indicate broader ideological placement along the political spectrum. While the model produced a reasonable placement for each state party, it is possible that text from party platforms alone may not provide as accurate a depiction as using text from more organic sources to indicate truer priorities and alignment.
+<br><br>
+<b>BLUE STATES, RED STATES, AND PURPLE STATES</b>
+<br><br>
+In a past life far, far away, when I lived in a city where the sun didn’t set at 4 p.m. and Corona was just a mediocre beer you ordered on happy hour special, I left my job in government (or rather, was forced out as a result of an election) and started a job doing something people dislike even more than bureaucrats: Email fundraising for political campaigns. Over the course of my time, I worked for a variety of clients, from state races to Congressional and Senate races, for very safe incumbents and highly-competitive challengers.
+<br><br>
+One thing that will likely haunt me for the rest of my days is the sheer volume of post-it notes I had covering my desk in place of a style guide for each candidate. Each campaign obviously had their unique branding and required hex codes for consistency, but it went much further. One candidate had to have “healthcare” while another wanted “health care,” one candidate was adamantly against hyphens (this was both personally and grammatically offensive), and don’t even get me started on generic filler text when you don’t have someone’s first name to address them -- Do you start the email “Hi friend”? Folks? Team? 
+<br><br>
+But all these small things are crucial for crafting an authentic candidate’s “voice” so that no matter where you hear them, on an event stage or in your inbox, there is consistency -- And nothing can make or break a “voice” quite like content. That’s why in the span of a few hours, I could jump from writing about wildly different topics like legalizing marijuana to out-of-control algae blooms (not kidding). Where it got particularly tricky was jumping between two different sides of the same topic, such as one candidate wanting to bash Trump or McConnell, while another candidate wanted to preach the virtues of bipartisanship. 
+<br><br>
+If you’re sitting cozily in your Vermont cabin, where Biden won by 30%, you can obviously get away with a lot more anti-Republican sentiment than you can if you’re sitting in scorching Arizona where Biden barely eked by with a victory (.3%!) and you’re reliant on pulling in some Republican votes to win. But that’s clearly not the only reason; each state has a unique situation and priorities based on the needs of the area, whether those are economic needs or social needs, as well as a significant culture (and in many cases, religious) component. States like Indiana or Nebraska are likely going to care more about policies impacting farmers than a state like Rhode Island or Delaware.
+<br><br>
+The saying goes that “all politics is local,” but really <i>how</i> local are they? <b>Namely, how much do state political parties vary on the political spectrum from each other and their national counterparts?</b>
+<br><br>
+Well, I decided to find out -- or at least try to -- by analyzing the text put forth by each state party in their party platforms, then using that text to predict each state’s political alignment.
+<br><br>
+<b>DATA</b>
+<br><br>
+First thing’s first, when doing a text analysis, you must have text. So I turned to the internet to hunt down each and every state party’s website to see if they had written a platform over the past few years. One thing that was outside of the scope of this project but was nonetheless a feeling of mine confirmed very quickly was that people in politics <i>really</i> do not invest enough time or money into their websites. Similarly, folks are not investing enough into copy editors -- Looking at you, Washingtons Tate Republican Party! But I digress. 
+<br><br>
+After combing through 102 state party websites and the two national party sites, what I found was that most but not all state parties agreed on a platform for themselves outside of the platforms settled on by the respective national parties. Of the 50 states and D.C., 36 Democratic parties published a party platform while 33 Republican parties published platforms. I also sought out the DNC and RNC platforms, and right off the bat, I was reminded what an odd election this was: For the first time since 1856, the RNC did not publish a new party platform, instead choosing to keep the same platform from 2020 and committing to re-elect President Trump (Epstein). 
+<br><br>
+All platforms were handled the same way, whether sourced from a website or a PDF. Each platform had title pages and tables of content removed, as well as extraneous material such as lists of committee members, acknowledgements sections, or platform-related processes such as rules and bylaws. The text analyzed includes preambles to the platform, if the platform had one. For the analysis, the text was processed in a state near its entirety -- while no stopwords were removed, many platforms included numbered lists as well as a variety of dates referencing when the platform was adopted, so I decided to remove numbers from the text data.
+<br><br>
+Roughly a third of the state parties chose to follow the national parties’ platforms rather than publish their own. In some cases, states parties followed the national platform but also included sections on issues or legislation on their website. While these often contain similar content to formal platforms, a platform goes through a significant drafting process and must be adopted by a vote either by the state party’s committee or one that is open to all members of the party. It’s safe to say that this formalized process likely has an impact on the content and wording included, therefore any content by a state party that is not a formal platform, such as the popular “On the Issues” section, was not included. Additionally, all platforms used were from either the 2016 or 2020 election cycle. While ideally platforms would all come from the same cycle, that likely would not have generated a large enough sampling of state parties, and would have excluded the Republican National Committee entirely.<br><br>
+<b>Word Frequency</b><br><br>
+For a top line look at how the different platforms stack up in terms of content, we can take a brief look at their word frequencies. Below are the top 30 words used by each party after all respective platforms had been aggregated and tallied. 
+
+
+```{r, echo=FALSE}
+D_freq %>%
+  kable("html", align = 'clc', caption = 'Democratic Platform Word Frequency Table') %>%
+    kable_styling(full_width = F, position = "float_left")
+ 
+R_freq %>%
+  kable("html", align = 'clc', caption = 'Republican Platform Word Frequency Table') %>%
+    kable_styling(full_width = F, position = "right")
+```
+
+
+<br><br>
+Clearly there is significant overlap between the two parties based on the type of content that has to be said, such as "support", "state", and "government", however the words that are unique say a lot about each party's approach toward politics and the roll of government. For the Republicans, "citizens", "law", "tax", and "life" stand out, whereas for the Democrats, "access", "programs", "communities", and "services" are a few of the top words. 
+
+But this is just a taste of the differences between the two parties -- Let's dig in to see what's happening within the parties. 
+<br><bR>
+<b>Democrat Analysis</b>
+<br><br>
+Once these platforms were imported and cleaned up, it was time to start analyzing, beginning with the Democrats. For this, all Democratic state party platforms and the national DNC platform were loaded into a dataframe and put into the same format, meaning punctuation and any remaining html code was removed, and all text was switched to lowercase. Then, a model using the Quanteda package's Wordfish was created using all of the text to analyze and plot the parties from left to right -- To help the model, two “global identifiers” needed to be included, meaning two parties that are anticipated to be on opposite sides of the spectrum needed to be stated to help the model along. 
+<br><br>
+At first, I ran this model guessing which states would be furthest left (Massachusetts) and furthest right (West Virginia) based on my own thoughts and experiences, but decided that maybe a bit more formal justification was needed. Ultimately, I turned to GovTrack, who plots members of Congress based on “ideology scores” that are derived from their legislative participation, namely, who they have worked with, what bills they have written or cosigned, and what bills they have voted for. In this case, since these are statewide platforms I opted to pick the states with the some of the furthest left and right Democratic Senators: Vice President-elect Kamala Harris of California and Senator Joe Manchin from West Virginia. Technically, New York, Vermont, and Oregon had further left senators than California, however New York did not have a state platform and number 2 was Vermont Senator Bernie Sanders who isn’t a Democrat. Ultimately, I chose California who came in as number 4 over number 3 Oregon due to both of California’s senators being Democrats, whereas Oregon is split one and one. Joe Manchin and West Virginia as the furthest right, however, were never a question.
+<br><br>
+
+```{r, echo=FALSE}
+plot(D_plot)
+```
+
+
+Clearly, using West Virginia as a global identifier was a good call! As you can see, the predicted alignment of each party rings true with the idea that the Democrats are a "big tent" party. <br><br> Interestingly enough, the national platform is the furthest left point, near some surprising plot points of Arkansas and Indiana, two states that are often viewed as extremely conservative and whose Democratic parties are often overlooked. On the right-aligned parties, you see the gaps that are common when dealing with increasingly distant outliers such as West Virginia and the Dakotas. 
+<br><br>
+<b>Republican Analysis</b>
+<br><br>
+And then, it was time to do the same for the Republicans. In this case, GovTrack listed Senator Susan Collins from Maine as the most moderate of the Republicans and Senator Jim Inhofe of Oklahoma as the furthest right, so those two states served as the global identifiers. Based on what I know of these two senators, this seemed like a safe bet. 
+<br><br>
+```{r, echo=FALSE}
+plot(R_plot)
+```
+
+
+Interestingly, the Republican state parties fall more consistently right of Republican center than Democrats fall left of Dem-center. Here, too, we an interesting point in the national platform -- In this situation, the RNC falls to the left of nearly all state parties. Again, it is worth noting that this platform is a cycle old, and therefore may not be predicted as accurately due to a shift since 2016 in policy priorities, attention given to specific issues, as well as what sort of wording and phrasing is used to discuss issues. But without a platform representing 2020, in this specific research design it cannot be predicted where the current party lies.
+<br><br>
+For fun, I decided to analyze the Republican platforms a second time, this time adding President Trump’s 50-point agenda to see if it influenced alignment at all, and to see where it fell. Besides introducing this additional text, all other inputs remained constant.<br><BR>
+
+```{r, echo=FALSE}
+plot(trump_plot)
+```
+
+As you can see, the other platforms remained consistent in their locations, and the Trump platform falls quite far to the left. This highlights an issue with this analysis: Just like any analysis, it relies on having enough quality data to accurately predict where a party falls on the spectrum. In the case of Trump’s plan, it is notoriously vague on topics and that is reflected in its length, with 50 bullet points of only a few words each -- The entire agenda fits on one page. Additionally, it notably left out several key Republican issues including abortion and Second Amendment and gun ownership rights, that Trump himself has spoken on several times. This could show the impact of how different text sources ultimately reveal different political alignments, each with their own sets of pros and cons: In the case of the Trump campaign or in any political party, these documents likely went through several rounds of edits and negotiations and may be more ‘refined’ or abbreviated in word choice and usage than using different sources of text, such as speeches, social media, or off-the-cuff remarks. For these reasons I do not believe that this specific plot point is a reliable or accurate prediction.
+<br><BR>
+<b>THE STATES, UNITED ON A PLOT</b><br><br>
+Lastly, I created a model using all of the states' platforms for both parties to create one continuous spectrum. In this model, I used the left-most identifier from the Democratic analysis (California) and the right-most from the Republican analysis (Oklahoma). 
+
+```{r, fig.height=9, fig.width = 4, echo=FALSE}
+plot(all_plot)
+```
+
+As we can see, certain states have reordered themselves with the added comparison of a second party -- For example, West Virginia is no longer the most conservative of the Democratic parties as it shifts left and Wyoming, noting that its confidence intervals are quite wide, takes the spot of most conservative. So conservative, in fact, that it is predicted as further right than many Republican parties, almost as if it is mirroring Wyoming Republicans shift to most conservative Republican party. 
+<br><br>
+Similarly, we see a few parties sort on the opposite side one would expect, specifically the aforementioned Wyoming Democrats, as well as Indiana Republicans. Referring back to the issue of up-to-date platforms and the RNC's use of the 2016 platform, Indiana's Republican Party can highlight exactly that impact. This specific platform was from 2018, two years after Mike Pence left the role of governor to transition to the vice presidency. Compared to the current governer, Eric Holcomb, Pence was considered extremely socially conservative as compared to Holcomb's conscious and stated focus on fiscal conservatism, which could potentially reflect in the platforms and party directino of each respective era. 
+<br><br>
+An interesting point to note is the continuity of plot points -- Whereas the Democrat platforms are largely continuous with the most significant gap visible only at the end separating the DNC platform from the states, the Republican parties appear to have a noticeable and large split between Arkansas and Kansas's respective parties. 
+<br><br>
+<b>Future Research Possibilities</b><br><Br>
+As discussed in relation to the inclusion of the Trump agenda and its predicted alignment, two significant factors that play a role are a) how much text is available, and b) what that text is. I think that this research could be improved on and taken further by including a wider variety and combination of text sources from the state level, such as through a comparison of alignments when using social media postings or content from state house speeches, or alternatively, incorporating these types of text to generate a larger and potentially more inclusive and holistic model. Alternatively, an interesting approach could be using text analysis to identify if shifts have occured over time at the national or at the state levels. 
+<br><br>
+Furthermore, I think this type of alignment prediction could be paired with additional text-related analysis to provide content-specific information. Originally, I set out to also incorporate some topic modeling as well as term frequency-inverse document frequency analysis, the latter of which is presented in the code, although there was not enough space to properly incorporate it into this blog. <br><br>
+But, until a model has been developed that can accurately predict political alignment and key topics, I will instead focus on being happy I no longer have to write emails on behalf of political candidates, guessing all along what content will go over well with the recipients. 
+
+#####
+
+<br><br>
+<i>All code and data used for each step of this project can be found at https://github.com/aconnpowers/ACP_Final_Project.</i><br><br>
+<b>Works Cited</b><br><br>
+Donald J. Trump for President, Inc. “Trump Campaign Announces President Trump's 2nd Term Agenda: Fighting for You!” Press Release., 2020, https://www.donaldjtrump.com/media/trump-campaign-announces-president-trumps-2nd-term-agenda-fighting-for-you.<br><br>
+Epstein, Reid J. “The G.O.P. Delivers Its 2020 Platform. It’s From 2016.” The New York Times, 25 August 2020, https://www.nytimes.com/2020/08/25/us/politics/republicans-platform.html.<br><br>
+GovTrack. “All Senators: Ideology Scores.” 2018 Report Cards, 2018, https://www.govtrack.us/congress/members/report-cards/2018/senate/ideology.<br><br>
+NYT Interactive. “Presidential Election Results: Biden Wins.” The New York Times, 14 December 2020, https://www.nytimes.com/interactive/2020/11/03/us/elections/results-president.html?action=click&pgtype=Article&state=default&module=styln-elections-2020&region=TOP_BANNER&context=election_recirc.
